@@ -13,6 +13,8 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 contract HypERC20 is ERC20Upgradeable, TokenRouter {
     uint8 private immutable _decimals;
 
+    // Precompile addresses for custom fork of geth.
+    // See https://github.com/primevprotocol/go-ethereum/pull/3
     address constant MINT = address(0x89);
     address constant BURN = address(0x90);
 
