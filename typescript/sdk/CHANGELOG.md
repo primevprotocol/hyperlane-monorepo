@@ -1,5 +1,23 @@
 # @hyperlane-xyz/sdk
 
+## 3.4.0
+
+### Minor Changes
+
+- b832e57ae: Replace Fallback and Retry Providers with new SmartProvider with more effective fallback/retry logic
+
+### Patch Changes
+
+- 7919417ec: Granular control of updating predeployed routingIsms based on routing config mismatch
+  - Add support for routingIsmDelta which filters out the incompatibility between the onchain deployed config and the desired config.
+  - Based on the above, you either update the deployed Ism with new routes, delete old routes, change owners, etc.
+  - `moduleMatchesConfig` uses the same
+- e06fe0b32: Supporting DefaultFallbackRoutingIsm through non-factory deployments
+- 79c96d718: Remove healthy RPC URLs and remove NeutronTestnet
+- Updated dependencies [e06fe0b32]
+  - @hyperlane-xyz/core@3.4.0
+  - @hyperlane-xyz/utils@3.4.0
+
 ## 3.3.0
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @hyperlane-xyz/core
 
+## 3.4.0
+
+### Patch Changes
+
+- e06fe0b32: Supporting DefaultFallbackRoutingIsm through non-factory deployments
+  - @hyperlane-xyz/utils@3.4.0
+
 ## 3.3.0
 
 ### Patch Changes

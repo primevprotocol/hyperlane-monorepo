@@ -1,5 +1,18 @@
 # @hyperlane-xyz/infra
 
+## 3.4.0
+
+### Patch Changes
+
+- e06fe0b32: Supporting DefaultFallbackRoutingIsm through non-factory deployments
+- Updated dependencies [7919417ec]
+- Updated dependencies [e06fe0b32]
+- Updated dependencies [b832e57ae]
+- Updated dependencies [79c96d718]
+  - @hyperlane-xyz/sdk@3.4.0
+  - @hyperlane-xyz/helloworld@3.4.0
+  - @hyperlane-xyz/utils@3.4.0
+
 ## 3.3.0
 
 ### Patch Changes
