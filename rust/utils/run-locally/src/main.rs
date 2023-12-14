@@ -30,11 +30,13 @@ use crate::{
     config::Config,
     ethereum::start_anvil,
     invariants::termination_invariants_met,
+    metrics::agent_balance_sum,
     solana::*,
     utils::{concat_path, make_static, stop_child, AgentHandles, ArbitraryData, TaskHandle},
 };
 
 mod config;
+mod cosmos;
 mod ethereum;
 mod invariants;
 mod logging;
@@ -166,7 +168,7 @@ fn main() -> ExitCode {
         // by setting this as a quorum provider we will cause nonce errors when delivering to test2
         // because the message will be sent to the node 3 times.
         .hyp_env("CHAINS_TEST2_RPCCONSENSUSTYPE", "quorum")
-        .hyp_env("CHAINS_TEST3_RPCCONSENSUSTYPE", "http://127.0.0.1:8545")
+        .hyp_env("CHAINS_TEST3_CONNECTION_URL", "http://127.0.0.1:8545")
         .hyp_env("METRICSPORT", "9092")
         .hyp_env("DB", relayer_db.to_str().unwrap())
         .hyp_env("CHAINS_TEST1_SIGNER_KEY", RELAYER_KEYS[0])
@@ -387,12 +389,13 @@ fn main() -> ExitCode {
 
     let loop_start = Instant::now();
     // give things a chance to fully start.
-    sleep(Duration::from_secs(5));
+    sleep(Duration::from_secs(10));
     let mut failure_occurred = false;
+    let starting_relayer_balance: f64 = agent_balance_sum(9092).unwrap();
     while !SHUTDOWN.load(Ordering::Relaxed) {
         if config.ci_mode {
             // for CI we have to look for the end condition.
-            if termination_invariants_met(&config)
+            if termination_invariants_met(&config, starting_relayer_balance)
                 // if termination_invariants_met(&config, &solana_path, &solana_config_path)
                 .unwrap_or(false)
             {

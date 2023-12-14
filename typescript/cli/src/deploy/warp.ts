@@ -20,14 +20,11 @@ import {
 import { Address, ProtocolType, objMap } from '@hyperlane-xyz/utils';
 
 import { log, logBlue, logGray, logGreen } from '../../logger.js';
-import { readDeploymentArtifacts } from '../config/artifacts.js';
 import { WarpRouteConfig, readWarpRouteConfig } from '../config/warp.js';
 import { MINIMUM_WARP_DEPLOY_GAS } from '../consts.js';
+import { getContext, getMergedContractAddresses } from '../context.js';
 import {
-  getContextWithSigner,
-  getMergedContractAddresses,
-} from '../context.js';
-import {
+  isFile,
   prepNewArtifactsFiles,
   runFileSelectionStep,
   writeJson,
@@ -51,24 +48,26 @@ export async function runWarpDeploy({
   outPath: string;
   skipConfirmation: boolean;
 }) {
-  const { multiProvider, signer } = getContextWithSigner(key, chainConfigPath);
+  const { multiProvider, signer, coreArtifacts } = await getContext({
+    chainConfigPath,
+    coreConfig: { coreArtifactsPath },
+    keyConfig: { key },
+  });
 
-  if (!warpConfigPath) {
+  if (!warpConfigPath || !isFile(warpConfigPath)) {
     warpConfigPath = await runFileSelectionStep(
       './configs',
       'Warp config',
       'warp',
     );
+  } else {
+    log(`Using warp config at ${warpConfigPath}`);
   }
   const warpRouteConfig = readWarpRouteConfig(warpConfigPath);
 
-  const artifacts = coreArtifactsPath
-    ? readDeploymentArtifacts(coreArtifactsPath)
-    : undefined;
-
   const configs = await runBuildConfigStep({
     warpRouteConfig,
-    artifacts,
+    coreArtifacts,
     multiProvider,
     signer,
   });
@@ -95,12 +94,12 @@ async function runBuildConfigStep({
   warpRouteConfig,
   multiProvider,
   signer,
-  artifacts,
+  coreArtifacts,
 }: {
   warpRouteConfig: WarpRouteConfig;
   multiProvider: MultiProvider;
   signer: ethers.Signer;
-  artifacts?: HyperlaneContractsMap<any>;
+  coreArtifacts?: HyperlaneContractsMap<any>;
 }) {
   log('Assembling token configs');
   const { base, synthetics } = warpRouteConfig;
@@ -113,11 +112,9 @@ async function runBuildConfigStep({
     `Using base token metadata: Name: ${baseMetadata.name}, Symbol: ${baseMetadata.symbol}, Decimals: ${baseMetadata.decimals}`,
   );
 
-  const mergedContractAddrs = getMergedContractAddresses(artifacts);
-
-  logGray(
-    'Contract addresses from artifacts:\n',
-    JSON.stringify(mergedContractAddrs[baseChainName], null, 4),
+  const mergedContractAddrs = getMergedContractAddresses(
+    coreArtifacts,
+    Object.keys(warpRouteConfig),
   );
 
   // Create configs that coalesce together values from the config file,
@@ -130,12 +127,12 @@ async function runBuildConfigStep({
           ? base.address!
           : ethers.constants.AddressZero,
       owner,
-      mailbox: base.mailbox || mergedContractAddrs[baseChainName].mailbox,
+      mailbox: base.mailbox || mergedContractAddrs[baseChainName]?.mailbox,
       interchainSecurityModule:
         base.interchainSecurityModule ||
-        mergedContractAddrs[baseChainName].interchainSecurityModule ||
-        mergedContractAddrs[baseChainName].multisigIsm,
-      // ismFactory: mergedContractAddrs[baseChainName].routingIsmFactory, // fix when updating from routingIsm
+        mergedContractAddrs[baseChainName]?.interchainSecurityModule ||
+        mergedContractAddrs[baseChainName]?.multisigIsm,
+      // ismFactory: mergedContractAddrs[baseChainName].routingIsmFactory, // TODO fix when updating from routingIsm
       foreignDeployment: base.foreignDeployment,
       name: baseMetadata.name,
       symbol: baseMetadata.symbol,
@@ -154,9 +151,9 @@ async function runBuildConfigStep({
       mailbox: synthetic.mailbox || mergedContractAddrs[sChainName].mailbox,
       interchainSecurityModule:
         synthetic.interchainSecurityModule ||
-        mergedContractAddrs[sChainName].interchainSecurityModule ||
-        mergedContractAddrs[sChainName].multisigIsm,
-      // ismFactory: mergedContractAddrs[sChainName].routingIsmFactory, // fix
+        mergedContractAddrs[sChainName]?.interchainSecurityModule ||
+        mergedContractAddrs[sChainName]?.multisigIsm,
+      // ismFactory: mergedContractAddrs[sChainName].routingIsmFactory, // TODO fix
       foreignDeployment: synthetic.foreignDeployment,
     };
   }
