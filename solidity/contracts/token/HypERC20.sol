@@ -23,7 +23,7 @@ contract HypERC20 is ERC20Upgradeable, TokenRouter {
 
     // This address assumes deployer is 0xBcA333b67fb805aB18B4Eb7aa5a0B09aB25E5ce2
     address private constant WHITELIST_ADDR =
-        address(0xaE476470bfc00B8a0e8531133bE621e87a981ec8);
+        address(0xF06aC11D2151Dd56b3766Cfc350F42234a2D17f4);
 
     constructor(uint8 __decimals, address _mailbox) TokenRouter(_mailbox) {
         _decimals = __decimals;
