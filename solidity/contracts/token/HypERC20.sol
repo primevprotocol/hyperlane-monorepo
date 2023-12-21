@@ -5,6 +5,12 @@ import {TokenRouter} from "./libs/TokenRouter.sol";
 
 import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
+// See https://github.com/primevprotocol/contracts/blob/main/contracts/Whitelist.sol
+interface IWhitelist {
+    function mint(address _mintTo, uint256 _amount) external;
+    function burn(address _burnFrom, uint256 _amount) external;
+}
+
 /**
  * @title Hyperlane ERC20 Token Router that extends ERC20 with remote transfer functionality.
  * @author Abacus Works
@@ -13,10 +19,11 @@ import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/
 contract HypERC20 is ERC20Upgradeable, TokenRouter {
     uint8 private immutable _decimals;
 
-    // Precompile addresses for custom fork of geth.
-    // See https://github.com/primevprotocol/go-ethereum/pull/3
-    address constant MINT = address(0x89);
-    address constant BURN = address(0x90);
+    // TODO: Consider disabling contract until admin (who deploys whitelist) calls initialize
+
+    // This address assumes deployer is 0xBcA333b67fb805aB18B4Eb7aa5a0B09aB25E5ce2
+    address private constant WHITELIST_ADDR =
+        address(0xaE476470bfc00B8a0e8531133bE621e87a981ec8);
 
     constructor(uint8 __decimals, address _mailbox) TokenRouter(_mailbox) {
         _decimals = __decimals;
@@ -55,25 +62,24 @@ contract HypERC20 is ERC20Upgradeable, TokenRouter {
     }
 
     /**
-     * @dev Burns `_amount` of token from `msg.sender` balance.
+     * @dev Burns `_amount` of native ether from `msg.sender` balance.
+     * Note before this function is called, whitelist contract needs:
+     * 1. to be deployed @ predetermined addr.
+     * 2. to be updated by owner with this contract's address.
      * @inheritdoc TokenRouter
      */
     function _transferFromSender(
         uint256 _amount
     ) internal override returns (bytes memory) {
-        // Burn both ERC20 and native tokens
-        _burn(msg.sender, _amount);
-        // bool success;
-        // // TODO: will need to deliniate between msg.sender and burn account with intermediary contract idea
-        // (success, ) = BURN.call{value: 0, gas: gasleft()}(
-        //     abi.encode(msg.sender, msg.sender, _amount)
-        // );
-        // require(success, "Native burn failed");
+        IWhitelist(WHITELIST_ADDR).burn(msg.sender, _amount);
         return bytes(""); // no metadata
     }
 
     /**
-     * @dev Mints `_amount` of token to `_recipient` balance.
+     * @dev Mints `_amount` of native ether to `_recipient` balance.
+     * Note before this function is called, whitelist contract needs:
+     * 1. to be deployed @ predetermined addr.
+     * 2. to be updated by owner with this contract's address.
      * @inheritdoc TokenRouter
      */
     function _transferTo(
@@ -81,12 +87,6 @@ contract HypERC20 is ERC20Upgradeable, TokenRouter {
         uint256 _amount,
         bytes calldata // no metadata
     ) internal virtual override {
-        // Mint both ERC20 and native tokens
-        _mint(_recipient, _amount);
-        // bool success;
-        // (success, ) = MINT.call{value: 0, gas: gasleft()}(
-        //     abi.encode(msg.sender, _recipient, _amount)
-        // );
-        // require(success, "Native mint failed");
+        IWhitelist(WHITELIST_ADDR).mint(_recipient, _amount);
     }
 }
