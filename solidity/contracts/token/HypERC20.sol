@@ -63,12 +63,12 @@ contract HypERC20 is ERC20Upgradeable, TokenRouter {
     ) internal override returns (bytes memory) {
         // Burn both ERC20 and native tokens
         _burn(msg.sender, _amount);
-        bool success;
-        // TODO: will need to deliniate between msg.sender and burn account with intermediary contract idea
-        (success, ) = BURN.call{value: 0, gas: gasleft()}(
-            abi.encode(msg.sender, msg.sender, _amount)
-        );
-        require(success, "Native burn failed");
+        // bool success;
+        // // TODO: will need to deliniate between msg.sender and burn account with intermediary contract idea
+        // (success, ) = BURN.call{value: 0, gas: gasleft()}(
+        //     abi.encode(msg.sender, msg.sender, _amount)
+        // );
+        // require(success, "Native burn failed");
         return bytes(""); // no metadata
     }
 
@@ -83,10 +83,10 @@ contract HypERC20 is ERC20Upgradeable, TokenRouter {
     ) internal virtual override {
         // Mint both ERC20 and native tokens
         _mint(_recipient, _amount);
-        bool success;
-        (success, ) = MINT.call{value: 0, gas: gasleft()}(
-            abi.encode(msg.sender, _recipient, _amount)
-        );
-        require(success, "Native mint failed");
+        // bool success;
+        // (success, ) = MINT.call{value: 0, gas: gasleft()}(
+        //     abi.encode(msg.sender, _recipient, _amount)
+        // );
+        // require(success, "Native mint failed");
     }
 }
