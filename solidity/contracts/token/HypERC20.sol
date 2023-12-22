@@ -21,9 +21,9 @@ contract HypERC20 is ERC20Upgradeable, TokenRouter {
 
     // TODO: Consider disabling contract until admin (who deploys whitelist) calls initialize
 
-    // This address assumes deployer is 0xBcA333b67fb805aB18B4Eb7aa5a0B09aB25E5ce2
+    // This address assumes deployer is 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
     address private constant WHITELIST_ADDR =
-        address(0xF06aC11D2151Dd56b3766Cfc350F42234a2D17f4);
+        address(0x07e77fdc3DF92E58c9230eEFaABdBd92a8D0c2Af);
 
     constructor(uint8 __decimals, address _mailbox) TokenRouter(_mailbox) {
         _decimals = __decimals;
