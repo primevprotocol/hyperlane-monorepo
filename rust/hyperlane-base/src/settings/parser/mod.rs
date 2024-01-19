@@ -50,19 +50,11 @@ impl FromRawConf<RawAgentConf, Option<&HashSet<&str>>> for Settings {
             .parse_u16()
             .unwrap_or(9090);
 
-        let fmt = p
-            .chain(&mut err)
-            .get_opt_key("log")
-            .get_opt_key("format")
-            .parse_value("Invalid log format")
-            .unwrap_or_default();
+        // Hardcode fmt to always be Style::Full
+        let fmt = Style::Full;
 
-        let level = p
-            .chain(&mut err)
-            .get_opt_key("log")
-            .get_opt_key("level")
-            .parse_value("Invalid log level")
-            .unwrap_or_default();
+        // Hardcode the level to always be Level::Trace
+        let level = Level::Trace;
 
         let raw_chains: Vec<(String, ValueParser)> = if let Some(filter) = filter {
             p.chain(&mut err)
