@@ -23,7 +23,7 @@ pub use self::json_value_parser::ValueParser;
 pub use super::envs::*;
 use crate::settings::{
     chains::IndexSettings, parser::connection_parser::build_connection_conf, trace::TracingConfig,
-    ChainConf, CoreContractAddresses, Settings, SignerConf,
+    ChainConf, CoreContractAddresses, Settings, SignerConf, trace::Level, trace::fmt::Style,
 };
 
 mod connection_parser;
